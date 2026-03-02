@@ -47,26 +47,42 @@ const PRODUCTS_QUERY = `
 `;
 
 export async function getProducts(): Promise<ShopProduct[]> {
-  if (!domain || !token) return [];
+  if (!domain || !token) {
+    console.log("[Shopify] Not configured — domain:", !!domain, "token:", !!token);
+    return [];
+  }
 
   try {
-    const res = await fetch(`https://${domain}/api/2024-01/graphql.json`, {
+    const url = `https://${domain}/api/2024-10/graphql.json`;
+    console.log("[Shopify] Fetching from:", url);
+
+    const res = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "X-Shopify-Storefront-Access-Token": token,
       },
       body: JSON.stringify({ query: PRODUCTS_QUERY }),
-      next: { revalidate: 300 }, // cache 5 min
+      next: { revalidate: 60 },
     });
 
-    if (!res.ok) return [];
+    if (!res.ok) {
+      console.log("[Shopify] API error:", res.status, res.statusText);
+      return [];
+    }
 
     const json = await res.json();
+
+    if (json.errors) {
+      console.log("[Shopify] GraphQL errors:", JSON.stringify(json.errors));
+      return [];
+    }
+
     const edges = json?.data?.products?.edges || [];
+    console.log("[Shopify] Found", edges.length, "products");
 
     const shopDomain = domain.replace(".myshopify.com", "");
-    const storeUrl = process.env.NEXT_PUBLIC_SHOPIFY_URL || `https://${shopDomain}.com`;
+    const storeUrl = process.env.NEXT_PUBLIC_SHOPIFY_URL || `https://${shopDomain}.myshopify.com`;
 
     return edges.map((edge: any) => {
       const p = edge.node;
@@ -88,7 +104,8 @@ export async function getProducts(): Promise<ShopProduct[]> {
         url: `${storeUrl}/products/${p.handle}`,
       };
     });
-  } catch {
+  } catch (err) {
+    console.log("[Shopify] Fetch error:", err);
     return [];
   }
 }
