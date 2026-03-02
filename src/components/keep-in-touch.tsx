@@ -54,11 +54,11 @@ export function KeepInTouch() {
 
   return (
     <div className="mt-4">
-      <p className="text-[17px] font-normal leading-relaxed text-white/35 max-w-[400px] mb-10">
+      <p className="text-[17px] font-normal leading-relaxed text-white/35 max-w-[400px] mx-auto mb-10">
         Nothing scheduled yet. Sign up and be the first to know when events go live.
       </p>
 
-      <div className="max-w-[440px]">
+      <div className="max-w-[440px] mx-auto">
         <div className="flex flex-col gap-3">
           <div className="grid grid-cols-2 gap-3">
             <input type="text" placeholder="First name" value={firstName} onChange={(e) => { setFirstName(e.target.value); if (status === "error") setStatus("idle"); }} className={inp} />

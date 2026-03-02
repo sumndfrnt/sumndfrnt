@@ -8,7 +8,7 @@ export async function EventsSection() {
   const past = await getPastEvents();
 
   return (
-    <section id="events" className="py-[120px] px-6 max-w-[900px] mx-auto">
+    <section id="events" className="py-[120px] px-6 max-w-[900px] mx-auto text-center">
       <Reveal>
         <h2 className="font-display text-[clamp(32px,5vw,56px)] font-bold leading-[1.06] tracking-tight text-white mb-4">
           Upcoming.
