@@ -116,7 +116,8 @@ export function Hero() {
   return (
     <section
       id="top"
-      className="min-h-[115vh] flex flex-col items-center justify-center px-6 pb-20 text-center relative overflow-hidden"
+      className="min-h-screen flex flex-col items-center justify-center px-6 text-center relative overflow-hidden"
+      style={{ paddingBottom: "15vh" }}
     >
       {/* Ambient glow */}
       <div
@@ -134,8 +135,8 @@ export function Hero() {
       <div
         className="absolute pointer-events-none"
         style={{
-          width: 280,
-          height: 280,
+          width: 340,
+          height: 340,
           borderRadius: "50%",
           top: "50%",
           left: "50%",
@@ -163,10 +164,10 @@ export function Hero() {
       >
         <div className="relative">
           <img
-            src="/logo-512.png"
+            src="/logo-hq.png"
             alt="SUM'N DFRNT"
-            width={200}
-            height={200}
+            width={280}
+            height={280}
             className="rounded-full mb-12 relative z-10"
           />
           {/* Soft glow — radial gradient instead of box-shadow */}
@@ -176,8 +177,8 @@ export function Hero() {
             style={{
               top: "50%",
               left: "50%",
-              width: 400,
-              height: 400,
+              width: 520,
+              height: 520,
               transform: "translate(-50%, calc(-50% - 24px))",
               borderRadius: "50%",
               background: "radial-gradient(circle, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 35%, rgba(255,255,255,0.01) 55%, transparent 70%)",
