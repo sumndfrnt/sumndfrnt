@@ -31,10 +31,10 @@ export function KeepInTouch() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ firstName, lastName, email, phone: phone || undefined, tag: "events" }),
       });
-      const data = await res.json();
       if (res.ok) {
         setStatus("success");
       } else {
+        const data = await res.json();
         setStatus("error");
         setMessage(data.error || "Something went wrong.");
       }
@@ -46,7 +46,7 @@ export function KeepInTouch() {
 
   if (status === "success") {
     return (
-      <div className="py-20 text-center">
+      <div className="py-12">
         <p className="text-[17px] text-white/70 font-medium">You&apos;re in, {firstName}.</p>
         <p className="text-[14px] text-white/30 mt-2">We&apos;ll hit you up first when something&apos;s coming.</p>
       </div>
@@ -54,16 +54,16 @@ export function KeepInTouch() {
   }
 
   return (
-    <div className="py-20">
-      <div className="text-center max-w-[440px] mx-auto">
-        <h3 className="font-display text-2xl sm:text-3xl font-bold text-white tracking-tight">
-          Know first.
-        </h3>
-        <p className="text-[15px] text-white/35 mt-3 leading-relaxed">
-          Sign up and we&apos;ll let you know before events go live.
-        </p>
+    <div className="py-12">
+      <h3 className="font-display text-2xl sm:text-3xl font-bold text-white tracking-tight">
+        Know first.
+      </h3>
+      <p className="text-[15px] text-white/35 mt-3 leading-relaxed max-w-[400px]">
+        Sign up and we&apos;ll let you know before events go live.
+      </p>
 
-        <div className="flex flex-col gap-3 mt-8">
+      <div className="max-w-[440px] mt-8">
+        <div className="flex flex-col gap-3">
           <div className="grid grid-cols-2 gap-3">
             <input type="text" placeholder="First name" value={firstName} onChange={(e) => { setFirstName(e.target.value); if (status === "error") setStatus("idle"); }} className={inp} />
             <input type="text" placeholder="Last name" value={lastName} onChange={(e) => setLastName(e.target.value)} className={inp} />
