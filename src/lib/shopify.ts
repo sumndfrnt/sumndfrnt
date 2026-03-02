@@ -81,8 +81,9 @@ export async function getProducts(): Promise<ShopProduct[]> {
     const edges = json?.data?.products?.edges || [];
     console.log("[Shopify] Found", edges.length, "products");
 
-    const shopDomain = domain.replace(".myshopify.com", "");
-    const storeUrl = process.env.NEXT_PUBLIC_SHOPIFY_URL || `https://${shopDomain}.myshopify.com`;
+    const storeUrl = (process.env.NEXT_PUBLIC_SHOPIFY_URL || "https://shop.sumndfrnt.com").replace(/\/+$/, "");
+    // Ensure https://
+    const baseUrl = storeUrl.startsWith("http") ? storeUrl : "https://" + storeUrl;
 
     return edges.map((edge: any) => {
       const p = edge.node;
@@ -101,7 +102,7 @@ export async function getProducts(): Promise<ShopProduct[]> {
         imageUrl: p.featuredImage?.url || null,
         imageAlt: p.featuredImage?.altText || p.title,
         available: p.availableForSale,
-        url: `${storeUrl}/products/${p.handle}`,
+        url: `${baseUrl}/products/${p.handle}`,
       };
     });
   } catch (err) {
@@ -111,9 +112,10 @@ export async function getProducts(): Promise<ShopProduct[]> {
 }
 
 export function getShopUrl(): string {
-  if (!domain) return "#";
-  const shopDomain = domain.replace(".myshopify.com", "");
-  const url = process.env.NEXT_PUBLIC_SHOPIFY_URL || `https://${shopDomain}.myshopify.com`;
+  if (!domain) return "https://shop.sumndfrnt.com";
+  const url = process.env.NEXT_PUBLIC_SHOPIFY_URL || "https://shop.sumndfrnt.com";
+  // Ensure https:// prefix
+  if (!url.startsWith("http")) return "https://" + url;
   return url.replace(/\/+$/, "");
 }
 

@@ -16,7 +16,7 @@ export async function ShopSection() {
   const shopUrl = getShopUrl();
 
   return (
-    <section id="merch" className="py-[120px] px-6 max-w-[900px] mx-auto text-center">
+    <section id="shop" className="py-[120px] px-6 max-w-[900px] mx-auto text-center">
       <Reveal>
         <h2 className="font-display text-[clamp(32px,5vw,56px)] font-bold leading-[1.06] tracking-tight text-white mb-12">
           Shop.
@@ -95,9 +95,9 @@ export async function ShopSection() {
             Official SUM&apos;N DFRNT merch is live.
           </p>
           <a
-            href={shopUrl !== "#" ? shopUrl : "/"}
-            target={shopUrl !== "#" ? "_blank" : undefined}
-            rel={shopUrl !== "#" ? "noopener noreferrer" : undefined}
+            href={shopUrl}
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-block bg-white text-black font-medium text-[15px] rounded-full px-8 py-3.5 hover:opacity-90 transition-opacity"
           >
             Visit Shop
