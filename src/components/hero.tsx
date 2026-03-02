@@ -116,7 +116,7 @@ export function Hero() {
   return (
     <section
       id="top"
-      className="min-h-[115vh] flex flex-col items-center justify-center px-6 pt-[120px] pb-20 text-center relative overflow-hidden"
+      className="min-h-[115vh] flex flex-col items-center justify-center px-6 pt-20 pb-20 text-center relative overflow-hidden"
     >
       {/* Ambient glow */}
       <div
@@ -165,8 +165,8 @@ export function Hero() {
           <img
             src="/logo-512.png"
             alt="SUM'N DFRNT"
-            width={160}
-            height={160}
+            width={200}
+            height={200}
             className="rounded-full mb-12 relative z-10"
           />
           {/* Breathing glow ring */}

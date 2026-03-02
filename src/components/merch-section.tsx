@@ -45,32 +45,35 @@ export function MerchSection() {
         <h2 className="font-display text-[clamp(32px,5vw,56px)] font-bold leading-[1.06] tracking-tight text-white mb-4">
           Merch.
         </h2>
-        <p className="text-[17px] font-normal leading-relaxed text-white/35 max-w-[400px] mb-12">
-          Official SUM&apos;N DFRNT merch is on the way. Be the first to know when it drops.
-        </p>
       </Reveal>
 
       <Reveal delay={0.1}>
         {status === "success" ? (
-          <div className="py-8">
+          <div className="mt-4">
             <p className="text-[17px] text-white/70 font-medium">You&apos;re on the list, {firstName}.</p>
-            <p className="text-[13px] text-white/25 mt-2">We&apos;ll email you when merch drops.</p>
+            <p className="text-[14px] text-white/30 mt-2">We&apos;ll email you when merch drops.</p>
           </div>
         ) : (
-          <div className="max-w-[440px]">
-            <div className="flex flex-col gap-3">
-              <div className="grid grid-cols-2 gap-3">
-                <input type="text" placeholder="First name" value={firstName} onChange={(e) => { setFirstName(e.target.value); if (status === "error") setStatus("idle"); }} className={inp} />
-                <input type="text" placeholder="Last name" value={lastName} onChange={(e) => setLastName(e.target.value)} className={inp} />
+          <div className="mt-4">
+            <p className="text-[17px] font-normal leading-relaxed text-white/35 max-w-[400px] mb-10">
+              Official SUM&apos;N DFRNT merch is on the way. Be the first to know when it drops.
+            </p>
+
+            <div className="max-w-[440px]">
+              <div className="flex flex-col gap-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <input type="text" placeholder="First name" value={firstName} onChange={(e) => { setFirstName(e.target.value); if (status === "error") setStatus("idle"); }} className={inp} />
+                  <input type="text" placeholder="Last name" value={lastName} onChange={(e) => setLastName(e.target.value)} className={inp} />
+                </div>
+                <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className={inp} />
+                <input type="tel" placeholder="Phone (optional)" value={phone} onChange={(e) => setPhone(e.target.value)} className={inp} />
+
+                <button onClick={handleSubmit} disabled={status === "loading"} className="w-full bg-white text-black font-medium text-[15px] rounded-xl py-3.5 hover:opacity-90 transition-opacity disabled:opacity-50 mt-1">
+                  {status === "loading" ? "..." : "Notify Me"}
+                </button>
+
+                {status === "error" && <p className="text-[13px] text-red-400/70">{message}</p>}
               </div>
-              <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className={inp} />
-              <input type="tel" placeholder="Phone (optional)" value={phone} onChange={(e) => setPhone(e.target.value)} className={inp} />
-
-              <button onClick={handleSubmit} disabled={status === "loading"} className="w-full bg-white text-black font-medium text-[15px] rounded-xl py-3.5 hover:opacity-90 transition-opacity disabled:opacity-50 mt-1">
-                {status === "loading" ? "..." : "Notify Me"}
-              </button>
-
-              {status === "error" && <p className="text-[13px] text-red-400/70">{message}</p>}
             </div>
           </div>
         )}
