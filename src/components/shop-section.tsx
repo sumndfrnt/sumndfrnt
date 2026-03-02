@@ -79,7 +79,7 @@ export async function ShopSection() {
           <Reveal delay={0.2}>
             <div className="mt-12">
               <a
-                href={shopUrl}
+                href={shopUrl + "/collections/all"}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-block text-[14px] font-medium text-white/50 border border-white/[0.08] rounded-full px-7 py-3 hover:text-white hover:border-white/25 transition-all"
@@ -95,7 +95,7 @@ export async function ShopSection() {
             Official SUM&apos;N DFRNT merch is live.
           </p>
           <a
-            href={shopUrl !== "#" ? shopUrl : "/"}
+            href={shopUrl !== "#" ? shopUrl + "/collections/all" : "/"}
             target={shopUrl !== "#" ? "_blank" : undefined}
             rel={shopUrl !== "#" ? "noopener noreferrer" : undefined}
             className="inline-block bg-white text-black font-medium text-[15px] rounded-full px-8 py-3.5 hover:opacity-90 transition-opacity"

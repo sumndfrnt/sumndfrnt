@@ -113,7 +113,8 @@ export async function getProducts(): Promise<ShopProduct[]> {
 export function getShopUrl(): string {
   if (!domain) return "#";
   const shopDomain = domain.replace(".myshopify.com", "");
-  return process.env.NEXT_PUBLIC_SHOPIFY_URL || `https://${shopDomain}.com`;
+  const url = process.env.NEXT_PUBLIC_SHOPIFY_URL || `https://${shopDomain}.myshopify.com`;
+  return url.replace(/\/+$/, "");
 }
 
 export function isShopConfigured(): boolean {

@@ -81,10 +81,10 @@ export function Hero() {
     // Glow — intensify then fade
     if (glowRef.current) {
       const glow = p < 0.5
-        ? 0.04 + p * 0.12
-        : 0.1 - (p - 0.5) * 0.16;
-      glowRef.current.style.opacity = `${Math.max(glow / 0.1, 0)}`;
-      glowRef.current.style.transform = `scale(${1 + ease * 0.5})`;
+        ? 0.5 + p * 0.8
+        : 0.9 - (p - 0.5) * 1.6;
+      glowRef.current.style.opacity = `${Math.max(glow, 0)}`;
+      glowRef.current.style.transform = `translate(-50%, calc(-50% - 24px)) scale(${1 + ease * 0.6})`;
     }
 
     // Headline — slide up, fade
@@ -116,7 +116,7 @@ export function Hero() {
   return (
     <section
       id="top"
-      className="min-h-[115vh] flex flex-col items-center justify-center px-6 pt-20 pb-20 text-center relative overflow-hidden"
+      className="min-h-[115vh] flex flex-col items-center justify-center px-6 pb-20 text-center relative overflow-hidden"
     >
       {/* Ambient glow */}
       <div
@@ -134,16 +134,16 @@ export function Hero() {
       <div
         className="absolute pointer-events-none"
         style={{
-          width: 220,
-          height: 220,
+          width: 280,
+          height: 280,
           borderRadius: "50%",
           top: "50%",
           left: "50%",
           transform: `translate(-50%, calc(-50% - 20px)) scale(${phase >= 1 ? (phase >= 2 ? 0 : 1.2) : 0})`,
-          boxShadow: phase === 1
-            ? "0 0 80px 20px rgba(255,255,255,0.08), 0 0 160px 60px rgba(255,255,255,0.03), inset 0 0 60px rgba(255,255,255,0.04)"
+          background: phase === 1
+            ? "radial-gradient(circle, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 40%, transparent 70%)"
             : "none",
-          border: phase === 1 ? "1px solid rgba(255,255,255,0.06)" : "none",
+          border: phase === 1 ? "1px solid rgba(255,255,255,0.05)" : "none",
           opacity: phase === 1 ? 1 : 0,
           transition: phase >= 2
             ? "all 0.6s cubic-bezier(0.16,1,0.3,1)"
@@ -169,15 +169,19 @@ export function Hero() {
             height={200}
             className="rounded-full mb-12 relative z-10"
           />
-          {/* Breathing glow ring */}
+          {/* Soft glow — radial gradient instead of box-shadow */}
           <div
             ref={glowRef}
-            className="absolute inset-0 rounded-full z-0"
+            className="absolute z-0 pointer-events-none"
             style={{
-              margin: "-10px",
-              marginBottom: "38px",
-              opacity: phase >= 2 ? (phase >= 3 ? 0.3 : 1) : 0,
-              boxShadow: "0 0 60px 15px rgba(255,255,255,0.06), 0 0 120px 40px rgba(255,255,255,0.02)",
+              top: "50%",
+              left: "50%",
+              width: 400,
+              height: 400,
+              transform: "translate(-50%, calc(-50% - 24px))",
+              borderRadius: "50%",
+              background: "radial-gradient(circle, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 35%, rgba(255,255,255,0.01) 55%, transparent 70%)",
+              opacity: phase >= 2 ? (phase >= 3 ? 0.5 : 1) : 0,
               animation: phase === 2 ? "logoBreathe 2s ease-in-out" : "none",
               transition: phase < 3 ? "opacity 1s ease" : "none",
               willChange: "transform, opacity",
@@ -254,10 +258,10 @@ export function Hero() {
           50% { transform: scaleY(1.3); opacity: 0.15; }
         }
         @keyframes logoBreathe {
-          0% { transform: scale(0.8); opacity: 0; }
-          30% { transform: scale(1.15); opacity: 1; }
-          60% { transform: scale(1); opacity: 0.7; }
-          100% { transform: scale(1); opacity: 0.3; }
+          0% { opacity: 0; }
+          30% { opacity: 1; }
+          60% { opacity: 0.7; }
+          100% { opacity: 0.5; }
         }
       `}</style>
     </section>
