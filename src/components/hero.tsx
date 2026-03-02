@@ -1,40 +1,126 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 
 export function Hero() {
-  const [phase, setPhase] = useState(0); // 0=hidden, 1=ring, 2=full, 3=settled
-  const [scrollY, setScrollY] = useState(0);
+  const [phase, setPhase] = useState(0);
 
+  // Refs for direct DOM manipulation — zero React re-renders during scroll
+  const logoRef = useRef<HTMLDivElement>(null);
+  const glowRef = useRef<HTMLDivElement>(null);
+  const headRef = useRef<HTMLHeadingElement>(null);
+  const ctaRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const ambientRef = useRef<HTMLDivElement>(null);
+
+  // Smooth scroll tracking with lerp
+  const scrollCurrent = useRef(0);
+  const scrollTarget = useRef(0);
+  const rafId = useRef(0);
+  const settled = useRef(false);
+
+  // Entrance sequence
   useEffect(() => {
-    // Cinematic entrance sequence
-    const t1 = setTimeout(() => setPhase(1), 200);   // ring glow appears
-    const t2 = setTimeout(() => setPhase(2), 900);   // logo scales in with spin
-    const t3 = setTimeout(() => setPhase(3), 2000);  // settled, scroll-ready
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+    const t1 = setTimeout(() => setPhase(1), 200);
+    const t2 = setTimeout(() => setPhase(2), 900);
+    const t3 = setTimeout(() => {
+      setPhase(3);
+      settled.current = true;
+      startScrollLoop();
+    }, 2000);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+      cancelAnimationFrame(rafId.current);
+    };
   }, []);
 
+  // Track scroll target
   useEffect(() => {
-    const onScroll = () => setScrollY(window.scrollY);
+    const onScroll = () => { scrollTarget.current = window.scrollY; };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Scroll-driven transforms — Apple parallax
-  const sp = Math.min(scrollY / 600, 1);
-  const logoScale = 1 + sp * 1.8;
-  const logoOpacity = 1 - sp * 0.75;
-  const logoBlur = sp * 4;
-  const textOpacity = Math.max(1 - sp * 1.5, 0);
-  const textY = sp * -50;
+  // Lerp loop — interpolates toward target for silk-smooth motion
+  const startScrollLoop = useCallback(() => {
+    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+
+    const tick = () => {
+      // Smooth interpolation — 0.08 = very smooth, 0.15 = snappier
+      scrollCurrent.current = lerp(scrollCurrent.current, scrollTarget.current, 0.1);
+
+      // Snap when close enough
+      if (Math.abs(scrollCurrent.current - scrollTarget.current) < 0.5) {
+        scrollCurrent.current = scrollTarget.current;
+      }
+
+      applyScrollTransforms(scrollCurrent.current);
+      rafId.current = requestAnimationFrame(tick);
+    };
+
+    rafId.current = requestAnimationFrame(tick);
+  }, []);
+
+  // Direct DOM mutations — no React involvement
+  const applyScrollTransforms = (y: number) => {
+    const p = Math.min(y / 700, 1); // progress 0→1 over 700px
+    const ease = p * p * (3 - 2 * p);  // smoothstep easing
+
+    // Logo — scale up, fade, blur
+    if (logoRef.current) {
+      const s = 1 + ease * 2;
+      const o = 1 - ease * 0.85;
+      const b = ease * 6;
+      logoRef.current.style.transform = `scale(${s})`;
+      logoRef.current.style.opacity = `${Math.max(o, 0)}`;
+      logoRef.current.style.filter = `blur(${b}px)`;
+    }
+
+    // Glow — intensify then fade
+    if (glowRef.current) {
+      const glow = p < 0.5
+        ? 0.04 + p * 0.12
+        : 0.1 - (p - 0.5) * 0.16;
+      glowRef.current.style.opacity = `${Math.max(glow / 0.1, 0)}`;
+      glowRef.current.style.transform = `scale(${1 + ease * 0.5})`;
+    }
+
+    // Headline — slide up, fade
+    if (headRef.current) {
+      const to = Math.max(1 - p * 2, 0);
+      headRef.current.style.opacity = `${to}`;
+      headRef.current.style.transform = `translateY(${-ease * 60}px)`;
+    }
+
+    // CTAs — slide up, fade (slightly faster)
+    if (ctaRef.current) {
+      const co = Math.max(1 - p * 2.5, 0);
+      ctaRef.current.style.opacity = `${co}`;
+      ctaRef.current.style.transform = `translateY(${-ease * 80}px)`;
+    }
+
+    // Scroll indicator — fade quickly
+    if (scrollRef.current) {
+      scrollRef.current.style.opacity = `${Math.max((1 - p * 4) * 0.4, 0)}`;
+    }
+
+    // Ambient glow
+    if (ambientRef.current) {
+      const ao = 0.015 + ease * 0.02;
+      ambientRef.current.style.background = `radial-gradient(ellipse at 50% 40%, rgba(255,255,255,${ao}), transparent 60%)`;
+    }
+  };
 
   return (
     <section
       id="top"
       className="min-h-[115vh] flex flex-col items-center justify-center px-6 pt-[120px] pb-20 text-center relative overflow-hidden"
     >
-      {/* Ambient glow — pulses on entrance then settles */}
+      {/* Ambient glow */}
       <div
+        ref={ambientRef}
         className="absolute inset-0 pointer-events-none"
         style={{
           background: phase >= 1
@@ -44,7 +130,7 @@ export function Hero() {
         }}
       />
 
-      {/* Ring glow — appears before logo */}
+      {/* Ring glow — pre-logo entrance */}
       <div
         className="absolute pointer-events-none"
         style={{
@@ -65,20 +151,14 @@ export function Hero() {
         }}
       />
 
-      {/* Logo — cinematic entrance + scroll zoom */}
+      {/* Logo — entrance animation handled by phase, scroll by ref */}
       <div
+        ref={logoRef}
         style={{
-          opacity: phase >= 2 ? logoOpacity : 0,
-          transform: phase >= 3
-            ? `scale(${logoScale})`
-            : phase >= 2
-              ? "scale(1) rotate(0deg)"
-              : "scale(0) rotate(-180deg)",
-          filter: phase >= 3 ? `blur(${logoBlur}px)` : "none",
-          transition: phase >= 3
-            ? "transform 0.05s linear, filter 0.1s linear"
-            : "all 1s cubic-bezier(0.16, 1, 0.3, 1)",
-          willChange: "transform",
+          opacity: phase >= 2 ? 1 : 0,
+          transform: phase >= 2 ? "scale(1) rotate(0deg)" : "scale(0) rotate(-180deg)",
+          transition: phase < 3 ? "all 1s cubic-bezier(0.16, 1, 0.3, 1)" : "none",
+          willChange: "transform, opacity, filter",
         }}
       >
         <div className="relative">
@@ -88,20 +168,19 @@ export function Hero() {
             width={160}
             height={160}
             className="rounded-full mb-12 relative z-10"
-            style={{
-              filter: `drop-shadow(0 0 ${20 + sp * 50}px rgba(255,255,255,${0.04 + sp * 0.08}))`,
-            }}
           />
-          {/* Glow ring behind logo — breathes on entrance */}
+          {/* Breathing glow ring */}
           <div
+            ref={glowRef}
             className="absolute inset-0 rounded-full z-0"
             style={{
               margin: "-10px",
               marginBottom: "38px",
-              opacity: phase >= 2 ? (phase >= 3 ? 0.3 - sp * 0.3 : 1) : 0,
+              opacity: phase >= 2 ? (phase >= 3 ? 0.3 : 1) : 0,
               boxShadow: "0 0 60px 15px rgba(255,255,255,0.06), 0 0 120px 40px rgba(255,255,255,0.02)",
               animation: phase === 2 ? "logoBreathe 2s ease-in-out" : "none",
-              transition: "opacity 1s ease",
+              transition: phase < 3 ? "opacity 1s ease" : "none",
+              willChange: "transform, opacity",
             }}
           />
         </div>
@@ -109,18 +188,16 @@ export function Hero() {
 
       {/* Headline */}
       <h1
+        ref={headRef}
         className="font-display font-bold text-white max-w-[700px]"
         style={{
           fontSize: "clamp(36px, 6vw, 72px)",
           lineHeight: 1.06,
           letterSpacing: "-0.03em",
-          opacity: phase >= 2 ? textOpacity : 0,
-          transform: phase >= 2
-            ? `translateY(${textY}px)`
-            : "translateY(40px)",
-          transition: phase >= 3
-            ? "opacity 0.1s linear"
-            : "all 1s cubic-bezier(0.16,1,0.3,1) 0.2s",
+          opacity: phase >= 2 ? 1 : 0,
+          transform: phase >= 2 ? "translateY(0)" : "translateY(40px)",
+          transition: phase < 3 ? "all 1s cubic-bezier(0.16,1,0.3,1) 0.2s" : "none",
+          willChange: "transform, opacity",
         }}
       >
         From the culture.
@@ -130,15 +207,13 @@ export function Hero() {
 
       {/* CTAs */}
       <div
+        ref={ctaRef}
         className="flex gap-4 mt-11"
         style={{
-          opacity: phase >= 2 ? textOpacity : 0,
-          transform: phase >= 2
-            ? `translateY(${textY}px)`
-            : "translateY(25px)",
-          transition: phase >= 3
-            ? "opacity 0.1s linear"
-            : "all 1s cubic-bezier(0.16,1,0.3,1) 0.4s",
+          opacity: phase >= 2 ? 1 : 0,
+          transform: phase >= 2 ? "translateY(0)" : "translateY(25px)",
+          transition: phase < 3 ? "all 1s cubic-bezier(0.16,1,0.3,1) 0.4s" : "none",
+          willChange: "transform, opacity",
         }}
       >
         <a
@@ -157,9 +232,10 @@ export function Hero() {
 
       {/* Scroll indicator */}
       <div
+        ref={scrollRef}
         className="absolute bottom-8 left-1/2 -translate-x-1/2"
         style={{
-          opacity: phase >= 3 ? Math.max((1 - sp * 3) * 0.4, 0) : 0,
+          opacity: phase >= 3 ? 0.4 : 0,
           transition: "opacity 1s ease 0.5s",
         }}
       >

@@ -1,5 +1,4 @@
 import { getUpcomingEvents, getPastEvents } from "@/lib/events-adapter";
-import { SectionTitle } from "./section-title";
 import { EventRow } from "./event-row";
 import { KeepInTouch } from "./keep-in-touch";
 import { Reveal } from "./reveal";
@@ -10,9 +9,12 @@ export async function EventsSection() {
 
   return (
     <section id="events" className="py-[120px] px-6 max-w-[900px] mx-auto">
-      <SectionTitle label="UPCOMING" title="Events." sub="Experience SUM'N DFRNT." />
+      <Reveal>
+        <h2 className="font-display text-[clamp(32px,5vw,56px)] font-bold leading-[1.06] tracking-tight text-white mb-14">
+          Upcoming.
+        </h2>
+      </Reveal>
 
-      {/* Upcoming */}
       <div className="flex flex-col">
         {upcoming.length > 0 ? (
           upcoming.map((event, i) => (
@@ -27,7 +29,6 @@ export async function EventsSection() {
         )}
       </div>
 
-      {/* Past events */}
       {past.length > 0 && (
         <div className="mt-20">
           <Reveal>

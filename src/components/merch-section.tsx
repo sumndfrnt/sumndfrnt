@@ -40,24 +40,25 @@ export function MerchSection() {
   };
 
   return (
-    <section id="merch" className="py-[120px] px-6">
-      <div className="max-w-[440px] mx-auto text-center">
-        <Reveal>
-          <p className="text-xs font-semibold tracking-[0.12em] text-white/30 mb-4">MERCH</p>
-          <h2 className="font-display text-[clamp(32px,5vw,56px)] font-bold leading-[1.06] tracking-tight text-white">
-            Coming soon.
-          </h2>
-          <p className="text-[17px] font-normal leading-relaxed text-white/35 mt-5 max-w-[400px] mx-auto">
-            Official SUM&apos;N DFRNT merch is on the way. Be the first to know when it drops.
-          </p>
+    <section id="merch" className="py-[120px] px-6 max-w-[900px] mx-auto">
+      <Reveal>
+        <h2 className="font-display text-[clamp(32px,5vw,56px)] font-bold leading-[1.06] tracking-tight text-white mb-4">
+          Merch.
+        </h2>
+        <p className="text-[17px] font-normal leading-relaxed text-white/35 max-w-[400px] mb-12">
+          Official SUM&apos;N DFRNT merch is on the way. Be the first to know when it drops.
+        </p>
+      </Reveal>
 
-          {status === "success" ? (
-            <div className="mt-8">
-              <p className="text-[17px] text-white/70 font-medium">You&apos;re on the list, {firstName}.</p>
-              <p className="text-[13px] text-white/25 mt-2">We&apos;ll email you when merch drops.</p>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-3 mt-8">
+      <Reveal delay={0.1}>
+        {status === "success" ? (
+          <div className="py-8">
+            <p className="text-[17px] text-white/70 font-medium">You&apos;re on the list, {firstName}.</p>
+            <p className="text-[13px] text-white/25 mt-2">We&apos;ll email you when merch drops.</p>
+          </div>
+        ) : (
+          <div className="max-w-[440px]">
+            <div className="flex flex-col gap-3">
               <div className="grid grid-cols-2 gap-3">
                 <input type="text" placeholder="First name" value={firstName} onChange={(e) => { setFirstName(e.target.value); if (status === "error") setStatus("idle"); }} className={inp} />
                 <input type="text" placeholder="Last name" value={lastName} onChange={(e) => setLastName(e.target.value)} className={inp} />
@@ -71,9 +72,9 @@ export function MerchSection() {
 
               {status === "error" && <p className="text-[13px] text-red-400/70">{message}</p>}
             </div>
-          )}
-        </Reveal>
-      </div>
+          </div>
+        )}
+      </Reveal>
     </section>
   );
 }
