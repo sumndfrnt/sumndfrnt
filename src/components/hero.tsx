@@ -1,165 +1,115 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useRef } from "react";
+import {
+  motion,
+  useScroll,
+  useTransform,
+  useSpring,
+  useReducedMotion,
+} from "framer-motion";
+
+const ease = [0.16, 1, 0.3, 1] as const;
+const springConfig = { stiffness: 80, damping: 30, mass: 0.5 };
 
 export function Hero() {
-  const [phase, setPhase] = useState(0);
+  const sectionRef = useRef<HTMLElement>(null);
+  const reducedMotion = useReducedMotion();
 
-  // Refs for direct DOM manipulation — zero React re-renders during scroll
-  const logoRef = useRef<HTMLDivElement>(null);
-  const glowRef = useRef<HTMLDivElement>(null);
-  const headRef = useRef<HTMLHeadingElement>(null);
-  const ctaRef = useRef<HTMLDivElement>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const ambientRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"],
+  });
 
-  // Smooth scroll tracking with lerp
-  const scrollCurrent = useRef(0);
-  const scrollTarget = useRef(0);
-  const rafId = useRef(0);
-  const settled = useRef(false);
+  // Smooth spring-wrapped scroll values
+  const smoothProgress = useSpring(scrollYProgress, springConfig);
+  const p = reducedMotion ? scrollYProgress : smoothProgress;
 
-  // Entrance sequence
-  useEffect(() => {
-    const t1 = setTimeout(() => setPhase(1), 200);
-    const t2 = setTimeout(() => setPhase(2), 900);
-    const t3 = setTimeout(() => {
-      setPhase(3);
-      settled.current = true;
-      startScrollLoop();
-    }, 2000);
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
-      cancelAnimationFrame(rafId.current);
-    };
-  }, []);
+  // Logo transforms
+  const logoScale = useTransform(p, [0, 0.6], [1, 2.2]);
+  const logoOpacity = useTransform(p, [0, 0.5], [1, 0]);
+  const logoBlur = useTransform(p, [0, 0.6], [0, 8]);
 
-  // Track scroll target
-  useEffect(() => {
-    const onScroll = () => { scrollTarget.current = window.scrollY; };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  // Glow transforms
+  const glowOpacity = useTransform(p, [0, 0.3, 0.6], [0.5, 0.8, 0]);
+  const glowScale = useTransform(p, [0, 0.6], [1, 1.4]);
 
-  // Lerp loop — interpolates toward target for silk-smooth motion
-  const startScrollLoop = useCallback(() => {
-    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+  // Headline transforms
+  const headOpacity = useTransform(p, [0, 0.35], [1, 0]);
+  const headY = useTransform(p, [0, 0.5], [0, -60]);
 
-    const tick = () => {
-      // Smooth interpolation — 0.08 = very smooth, 0.15 = snappier
-      scrollCurrent.current = lerp(scrollCurrent.current, scrollTarget.current, 0.1);
+  // CTA transforms — fade slightly faster
+  const ctaOpacity = useTransform(p, [0, 0.3], [1, 0]);
+  const ctaY = useTransform(p, [0, 0.4], [0, -80]);
 
-      // Snap when close enough
-      if (Math.abs(scrollCurrent.current - scrollTarget.current) < 0.5) {
-        scrollCurrent.current = scrollTarget.current;
-      }
+  // Scroll indicator
+  const scrollIndicatorOpacity = useTransform(p, [0, 0.15], [0.4, 0]);
 
-      applyScrollTransforms(scrollCurrent.current);
-      rafId.current = requestAnimationFrame(tick);
-    };
+  // Ambient background
+  const ambientOpacity = useTransform(p, [0, 0.5], [0.015, 0.035]);
 
-    rafId.current = requestAnimationFrame(tick);
-  }, []);
+  // Entrance animation variants
+  const entrance = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.2, delayChildren: 0.15 } },
+  };
 
-  // Direct DOM mutations — no React involvement
-  const applyScrollTransforms = (y: number) => {
-    const p = Math.min(y / 700, 1); // progress 0→1 over 700px
-    const ease = p * p * (3 - 2 * p);  // smoothstep easing
+  const logoEntrance = {
+    hidden: { opacity: 0, scale: 0, rotate: -180 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      rotate: 0,
+      transition: { duration: 1, ease },
+    },
+  };
 
-    // Logo — scale up, fade, blur
-    if (logoRef.current) {
-      const s = 1 + ease * 2;
-      const o = 1 - ease * 0.85;
-      const b = ease * 6;
-      logoRef.current.style.transform = `scale(${s})`;
-      logoRef.current.style.opacity = `${Math.max(o, 0)}`;
-      logoRef.current.style.filter = `blur(${b}px)`;
-    }
+  const fadeUp = {
+    hidden: { opacity: 0, y: 40 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.9, ease },
+    },
+  };
 
-    // Glow — intensify then fade
-    if (glowRef.current) {
-      const glow = p < 0.5
-        ? 0.5 + p * 0.8
-        : 0.9 - (p - 0.5) * 1.6;
-      glowRef.current.style.opacity = `${Math.max(glow, 0)}`;
-      glowRef.current.style.transform = `translate(-50%, calc(-50% - 24px)) scale(${1 + ease * 0.6})`;
-    }
-
-    // Headline — slide up, fade
-    if (headRef.current) {
-      const to = Math.max(1 - p * 2, 0);
-      headRef.current.style.opacity = `${to}`;
-      headRef.current.style.transform = `translateY(${-ease * 60}px)`;
-    }
-
-    // CTAs — slide up, fade (slightly faster)
-    if (ctaRef.current) {
-      const co = Math.max(1 - p * 2.5, 0);
-      ctaRef.current.style.opacity = `${co}`;
-      ctaRef.current.style.transform = `translateY(${-ease * 80}px)`;
-    }
-
-    // Scroll indicator — fade quickly
-    if (scrollRef.current) {
-      scrollRef.current.style.opacity = `${Math.max((1 - p * 4) * 0.4, 0)}`;
-    }
-
-    // Ambient glow
-    if (ambientRef.current) {
-      const ao = 0.015 + ease * 0.02;
-      ambientRef.current.style.background = `radial-gradient(ellipse at 50% 40%, rgba(255,255,255,${ao}), transparent 60%)`;
-    }
+  const ctaEntrance = {
+    hidden: { opacity: 0, y: 25 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.9, ease, delay: 0.1 },
+    },
   };
 
   return (
-    <section
+    <motion.section
+      ref={sectionRef}
       id="top"
       className="min-h-screen flex flex-col items-center justify-center px-6 text-center relative overflow-hidden"
       style={{ paddingBottom: "15vh" }}
+      variants={entrance}
+      initial="hidden"
+      animate="visible"
     >
       {/* Ambient glow */}
-      <div
-        ref={ambientRef}
+      <motion.div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: phase >= 1
-            ? `radial-gradient(ellipse at 50% 40%, rgba(255,255,255,${phase === 1 ? 0.04 : 0.015}), transparent 60%)`
-            : "none",
-          transition: "all 1.5s ease",
+          background: useTransform(
+            ambientOpacity,
+            (v) => `radial-gradient(ellipse at 50% 40%, rgba(255,255,255,${v}), transparent 60%)`
+          ),
         }}
       />
 
-      {/* Ring glow — pre-logo entrance */}
-      <div
-        className="absolute pointer-events-none"
+      {/* Logo */}
+      <motion.div
+        variants={logoEntrance}
         style={{
-          width: 340,
-          height: 340,
-          borderRadius: "50%",
-          top: "50%",
-          left: "50%",
-          transform: `translate(-50%, calc(-50% - 20px)) scale(${phase >= 1 ? (phase >= 2 ? 0 : 1.2) : 0})`,
-          background: phase === 1
-            ? "radial-gradient(circle, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 40%, transparent 70%)"
-            : "none",
-          border: phase === 1 ? "1px solid rgba(255,255,255,0.05)" : "none",
-          opacity: phase === 1 ? 1 : 0,
-          transition: phase >= 2
-            ? "all 0.6s cubic-bezier(0.16,1,0.3,1)"
-            : "all 0.8s cubic-bezier(0.34,1.56,0.64,1)",
-        }}
-      />
-
-      {/* Logo — entrance animation handled by phase, scroll by ref */}
-      <div
-        ref={logoRef}
-        style={{
-          opacity: phase >= 2 ? 1 : 0,
-          transform: phase >= 2 ? "scale(1) rotate(0deg)" : "scale(0) rotate(-180deg)",
-          transition: phase < 3 ? "all 1s cubic-bezier(0.16, 1, 0.3, 1)" : "none",
-          willChange: "transform, opacity, filter",
+          scale: logoScale,
+          opacity: logoOpacity,
+          filter: useTransform(logoBlur, (v) => `blur(${v}px)`),
         }}
       >
         <div className="relative">
@@ -170,55 +120,50 @@ export function Hero() {
             height={280}
             className="rounded-full mb-12 relative z-10"
           />
-          {/* Soft glow — radial gradient instead of box-shadow */}
-          <div
-            ref={glowRef}
+          {/* Soft halo glow */}
+          <motion.div
             className="absolute z-0 pointer-events-none"
             style={{
               top: "50%",
               left: "50%",
               width: 520,
               height: 520,
-              transform: "translate(-50%, calc(-50% - 24px))",
+              x: "-50%",
+              y: "calc(-50% - 24px)",
               borderRadius: "50%",
-              background: "radial-gradient(circle, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 35%, rgba(255,255,255,0.01) 55%, transparent 70%)",
-              opacity: phase >= 2 ? (phase >= 3 ? 0.5 : 1) : 0,
-              animation: phase === 2 ? "logoBreathe 2s ease-in-out" : "none",
-              transition: phase < 3 ? "opacity 1s ease" : "none",
-              willChange: "transform, opacity",
+              background:
+                "radial-gradient(circle, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 35%, rgba(255,255,255,0.01) 55%, transparent 70%)",
+              opacity: glowOpacity,
+              scale: glowScale,
             }}
           />
         </div>
-      </div>
+      </motion.div>
 
       {/* Headline */}
-      <h1
-        ref={headRef}
+      <motion.h1
+        variants={fadeUp}
         className="font-display font-bold text-white max-w-[700px]"
         style={{
-          fontSize: "clamp(36px, 6vw, 72px)",
+          fontSize: "clamp(44px, 8vw, 88px)",
           lineHeight: 1.06,
-          letterSpacing: "-0.03em",
-          opacity: phase >= 2 ? 1 : 0,
-          transform: phase >= 2 ? "translateY(0)" : "translateY(40px)",
-          transition: phase < 3 ? "all 1s cubic-bezier(0.16,1,0.3,1) 0.2s" : "none",
-          willChange: "transform, opacity",
+          letterSpacing: "-0.04em",
+          opacity: headOpacity,
+          y: headY,
         }}
       >
         From the culture.
         <br />
         For what&apos;s next.
-      </h1>
+      </motion.h1>
 
       {/* CTAs */}
-      <div
-        ref={ctaRef}
+      <motion.div
+        variants={ctaEntrance}
         className="flex gap-4 mt-11"
         style={{
-          opacity: phase >= 2 ? 1 : 0,
-          transform: phase >= 2 ? "translateY(0)" : "translateY(25px)",
-          transition: phase < 3 ? "all 1s cubic-bezier(0.16,1,0.3,1) 0.4s" : "none",
-          willChange: "transform, opacity",
+          opacity: ctaOpacity,
+          y: ctaY,
         }}
       >
         <a
@@ -233,38 +178,26 @@ export function Hero() {
         >
           Learn More
         </a>
-      </div>
+      </motion.div>
 
       {/* Scroll indicator */}
-      <div
-        ref={scrollRef}
+      <motion.div
         className="absolute bottom-8 left-1/2 -translate-x-1/2"
-        style={{
-          opacity: phase >= 3 ? 0.4 : 0,
-          transition: "opacity 1s ease 0.5s",
-        }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.4 }}
+        transition={{ delay: 1.8, duration: 1 }}
+        style={{ opacity: scrollIndicatorOpacity }}
       >
-        <div
+        <motion.div
           className="w-px h-12"
           style={{
-            background: "linear-gradient(to bottom, rgba(255,255,255,0.4), transparent)",
-            animation: phase >= 3 ? "scrollPulse 2s ease-in-out infinite" : "none",
+            background:
+              "linear-gradient(to bottom, rgba(255,255,255,0.4), transparent)",
           }}
+          animate={{ scaleY: [1, 1.3, 1], opacity: [0.4, 0.15, 0.4] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
         />
-      </div>
-
-      <style>{`
-        @keyframes scrollPulse {
-          0%, 100% { transform: scaleY(1); opacity: 0.4; }
-          50% { transform: scaleY(1.3); opacity: 0.15; }
-        }
-        @keyframes logoBreathe {
-          0% { opacity: 0; }
-          30% { opacity: 1; }
-          60% { opacity: 0.7; }
-          100% { opacity: 0.5; }
-        }
-      `}</style>
-    </section>
+      </motion.div>
+    </motion.section>
   );
 }

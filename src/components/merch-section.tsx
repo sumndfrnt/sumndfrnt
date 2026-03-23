@@ -40,7 +40,7 @@ export function MerchSection() {
   };
 
   return (
-    <section id="merch" className="py-[120px] px-6 max-w-[900px] mx-auto">
+    <section id="merch" className="py-[160px] px-6 max-w-[900px] mx-auto">
       <Reveal>
         <h2 className="font-display text-[clamp(32px,5vw,56px)] font-bold leading-[1.06] tracking-tight text-white mb-4">
           Merch.

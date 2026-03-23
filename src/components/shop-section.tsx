@@ -16,7 +16,7 @@ export async function ShopSection() {
   const shopUrl = getShopUrl();
 
   return (
-    <section id="shop" className="py-[120px] px-6 max-w-[900px] mx-auto text-center">
+    <section id="shop" className="py-[160px] px-6 max-w-[900px] mx-auto text-center">
       <Reveal>
         <h2 className="font-display text-[clamp(32px,5vw,56px)] font-bold leading-[1.06] tracking-tight text-white mb-12">
           Shop.

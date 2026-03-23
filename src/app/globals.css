@@ -21,7 +21,7 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  /* scroll-behavior handled programmatically — CSS smooth-scroll conflicts with framer-motion scroll tracking */
 }
 
 body {
@@ -53,7 +53,7 @@ a {
   text-decoration: none;
 }
 
-/* Heading font */
+/* Heading font — Instrument Sans with system fallback */
 .font-display {
-  font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: 'Instrument Sans', -apple-system, 'SF Pro Display', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }

@@ -17,10 +17,7 @@ export function AboutSection() {
   return (
     <section
       id="about"
-      className="py-[140px] px-6"
-      style={{
-        background: "linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.015) 50%, transparent 100%)",
-      }}
+      className="py-[160px] px-6"
     >
       <div className="max-w-[680px] mx-auto">
         <SectionTitle
@@ -34,7 +31,7 @@ export function AboutSection() {
               <p
                 className={`leading-relaxed ${
                   i === 0
-                    ? "text-xl font-medium text-white/85"
+                    ? "text-[22px] font-medium text-white/85 leading-relaxed"
                     : "text-[17px] text-white/40"
                 }`}
               >
