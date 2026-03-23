@@ -16,94 +16,100 @@ export async function ShopSection() {
   const shopUrl = getShopUrl();
 
   return (
-    <section id="shop" className="py-[160px] px-6 max-w-[900px] mx-auto text-center">
-      <Reveal>
-        <h2 className="font-display text-[clamp(32px,5vw,56px)] font-bold leading-[1.06] tracking-tight text-white mb-12">
-          Shop.
-        </h2>
-      </Reveal>
+    <section id="shop" className="relative py-[140px] sm:py-[180px] px-8 sm:px-12 lg:px-20">
+      {/* Divider */}
+      <div className="absolute top-0 left-8 sm:left-12 lg:left-20 right-8 sm:right-12 lg:right-20 h-px bg-white/[0.04]" />
 
-      {products.length > 0 ? (
-        <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {products.map((product, i) => (
-              <Reveal key={product.id} delay={i * 0.06}>
+      <div className="max-w-[1200px] mx-auto">
+        <Reveal>
+          <p className="text-[11px] font-semibold tracking-[0.2em] text-white/20 uppercase mb-6">
+            Shop
+          </p>
+          <h2
+            className="font-display font-bold text-white leading-[1.05] mb-16"
+            style={{
+              fontSize: "clamp(36px, 5vw, 64px)",
+              letterSpacing: "-0.04em",
+            }}
+          >
+            Merch.
+          </h2>
+        </Reveal>
+
+        {products.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {products.map((product, i) => (
+                <Reveal key={product.id} delay={i * 0.08}>
+                  <a
+                    href={product.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group block rounded-xl overflow-hidden border border-white/[0.04] bg-white/[0.015] transition-all duration-700 hover:border-white/[0.1] hover:-translate-y-[3px]"
+                  >
+                    <div className="aspect-[4/5] overflow-hidden bg-[#060608]">
+                      {product.imageUrl ? (
+                        <img
+                          src={product.imageUrl}
+                          alt={product.imageAlt}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <span className="text-white/8 text-sm">No image</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="px-5 py-5 flex items-center justify-between">
+                      <div>
+                        {!product.available && (
+                          <span className="inline-block text-[10px] font-semibold tracking-widest px-2.5 py-1 rounded-md bg-white/[0.04] text-white/20 mb-2 uppercase">
+                            Sold out
+                          </span>
+                        )}
+                        <p className="text-[15px] font-medium text-white/80 tracking-tight">
+                          {product.title}
+                        </p>
+                      </div>
+                      <p className="text-[14px] text-white/30">
+                        {formatPrice(product.priceAmount, product.priceCurrency)}
+                      </p>
+                    </div>
+                  </a>
+                </Reveal>
+              ))}
+            </div>
+
+            <Reveal delay={0.2}>
+              <div className="mt-14">
                 <a
-                  href={product.url}
+                  href={shopUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group block rounded-2xl overflow-hidden border border-white/[0.06] bg-white/[0.02] transition-all duration-400 hover:border-white/[0.12] hover:-translate-y-0.5"
+                  className="text-[13px] text-white/25 hover:text-white/50 transition-colors duration-500"
                 >
-                  <div className="aspect-square overflow-hidden bg-[#0a0a0a]">
-                    {product.imageUrl ? (
-                      <img
-                        src={product.imageUrl}
-                        alt={product.imageAlt}
-                        className="w-full h-full object-cover transition-transform duration-600 group-hover:scale-[1.04]"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <span className="text-white/10 text-sm">No image</span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="px-4 py-4 text-left">
-                    {!product.available && (
-                      <span className="inline-block text-[11px] font-semibold tracking-wide px-2.5 py-1 rounded-md bg-white/[0.06] text-white/30 mb-2">
-                        Sold out
-                      </span>
-                    )}
-                    {product.compareAtPrice && product.available && (
-                      <span className="inline-block text-[11px] font-semibold tracking-wide px-2.5 py-1 rounded-md bg-red-500/15 text-red-400 mb-2">
-                        Sale
-                      </span>
-                    )}
-                    <p className="text-[15px] font-semibold text-white tracking-tight leading-snug">
-                      {product.title}
-                    </p>
-                    <p className="text-[14px] text-white/50 mt-1.5">
-                      {product.compareAtPrice && (
-                        <span className="line-through text-white/25 mr-2">
-                          {formatPrice(product.compareAtPrice, product.priceCurrency)}
-                        </span>
-                      )}
-                      {formatPrice(product.priceAmount, product.priceCurrency)}
-                    </p>
-                  </div>
+                  View all &rarr;
                 </a>
-              </Reveal>
-            ))}
-          </div>
-
-          <Reveal delay={0.2}>
-            <div className="mt-12">
-              <a
-                href={shopUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block text-[14px] font-medium text-white/50 border border-white/[0.08] rounded-full px-7 py-3 hover:text-white hover:border-white/25 transition-all"
-              >
-                View All
-              </a>
-            </div>
+              </div>
+            </Reveal>
+          </>
+        ) : (
+          <Reveal delay={0.1}>
+            <p className="text-[17px] text-white/30 max-w-[400px] mb-8">
+              Official SUM&apos;N DFRNT merch is live.
+            </p>
+            <a
+              href={shopUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block text-[14px] font-medium text-black bg-white rounded-full px-8 py-3.5 hover:opacity-80 transition-opacity duration-500"
+            >
+              Visit Shop
+            </a>
           </Reveal>
-        </>
-      ) : (
-        <Reveal delay={0.1}>
-          <p className="text-[17px] font-normal leading-relaxed text-white/35 max-w-[400px] mx-auto mb-10">
-            Official SUM&apos;N DFRNT merch is live.
-          </p>
-          <a
-            href={shopUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block bg-white text-black font-medium text-[15px] rounded-full px-8 py-3.5 hover:opacity-90 transition-opacity"
-          >
-            Visit Shop
-          </a>
-        </Reveal>
-      )}
+        )}
+      </div>
     </section>
   );
 }
