@@ -54,13 +54,16 @@ export async function POST(req: NextRequest) {
   if (!campaign) return NextResponse.json({ error: "Campaign not found" }, { status: 404 });
   if (campaign.status === "sent") return NextResponse.json({ error: "Already sent" }, { status: 400 });
 
-  let subscribers;
+  let subscribers: Subscriber[] = [];
   if (campaign.targetTags.length > 0) {
-    subscribers = campaign.targetTags.flatMap((tag) => getActiveEmailSubscribers(tag));
+    for (const tag of campaign.targetTags) {
+      const tagSubs = await getActiveEmailSubscribers(tag);
+      subscribers.push(...tagSubs);
+    }
     const seen = new Set<string>();
     subscribers = subscribers.filter((s) => { if (seen.has(s.id)) return false; seen.add(s.id); return true; });
   } else {
-    subscribers = getActiveEmailSubscribers();
+    subscribers = await getActiveEmailSubscribers();
   }
 
   if (subscribers.length === 0) {

@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
   const status = searchParams.get("status");
   const format = searchParams.get("format");
 
-  let subs = getSubscribers();
+  let subs = await getSubscribers();
   if (tag) subs = subs.filter((s) => s.tags.includes(tag));
   if (status) subs = subs.filter((s) => s.status === status);
 
@@ -35,14 +35,14 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
 
   if (Array.isArray(body)) {
-    const subs = getSubscribers();
+    const subs = await getSubscribers();
     const existing = new Set(subs.map((s) => s.email?.toLowerCase()));
     let added = 0;
     for (const item of body) {
       const email = item.email?.toLowerCase().trim();
       if (email && existing.has(email)) continue;
       try {
-        addSubscriber({
+        await addSubscriber({
           firstName: item.firstName || "",
           lastName: item.lastName || "",
           email: email || "",
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
   const { firstName, lastName, email, phone, tags } = body;
   if (!email && !phone) return NextResponse.json({ error: "Email or phone required" }, { status: 400 });
   try {
-    const sub = addSubscriber({
+    const sub = await addSubscriber({
       firstName: firstName || "",
       lastName: lastName || "",
       email: email?.toLowerCase().trim() || "",
@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   if (!isAuthed(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const body = await req.json();
-  const subs = getSubscribers();
+  const subs = await getSubscribers();
   const idx = subs.findIndex((s) => s.id === body.id);
   if (idx < 0) return NextResponse.json({ error: "Not found" }, { status: 404 });
   if (body.firstName !== undefined) subs[idx].firstName = body.firstName;
@@ -85,7 +85,7 @@ export async function PUT(req: NextRequest) {
   if (body.tags) subs[idx].tags = body.tags;
   if (body.email) subs[idx].email = body.email.toLowerCase().trim();
   if (body.phone) subs[idx].phone = body.phone.replace(/\D/g, "");
-  saveSubscribers(subs);
+  await saveSubscribers(subs);
   return NextResponse.json(subs[idx]);
 }
 
@@ -94,7 +94,7 @@ export async function DELETE(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
   if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 });
-  const subs = getSubscribers().filter((s) => s.id !== id);
-  saveSubscribers(subs);
+  const subs = (await getSubscribers()).filter((s) => s.id !== id);
+  await saveSubscribers(subs);
   return NextResponse.json({ deleted: id });
 }

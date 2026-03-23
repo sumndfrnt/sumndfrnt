@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const sub = addSubscriber({
+    const sub = await addSubscriber({
       firstName: cleanFirst,
       lastName: cleanLast,
       email: cleanEmail,
@@ -101,11 +101,6 @@ export async function POST(req: NextRequest) {
   } catch (err: any) {
     if (err.message === "Already subscribed") {
       // Don't confirm existence — same response for privacy
-      return NextResponse.json({ message: "Subscribed" }, { status: 201 });
-    }
-    // Filesystem write failures on serverless (EROFS/ENOENT) — accept the submission
-    // gracefully. Subscriber is not persisted until storage is migrated to a database.
-    if (err.code === "EROFS" || err.code === "ENOENT" || err.code === "EACCES") {
       return NextResponse.json({ message: "Subscribed" }, { status: 201 });
     }
     return NextResponse.json({ error: "Something went wrong" }, { status: 500 });

@@ -1,5 +1,6 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { join } from "path";
+import { Redis } from "@upstash/redis";
 
 const DATA_DIR = join(process.cwd(), "data");
 
@@ -22,6 +23,16 @@ function saveFile<T>(filename: string, data: T) {
 }
 
 // ═══════════════════════════════════════
+// REDIS CLIENT (for subscribers)
+// ═══════════════════════════════════════
+const redis = new Redis({
+  url: process.env.KV_REST_API_URL!,
+  token: process.env.KV_REST_API_TOKEN!,
+});
+
+const SUBSCRIBERS_KEY = "subscribers";
+
+// ═══════════════════════════════════════
 // SUBSCRIBERS
 // ═══════════════════════════════════════
 export interface Subscriber {
@@ -37,16 +48,17 @@ export interface Subscriber {
   unsubscribedAt?: string;
 }
 
-export function getSubscribers(): Subscriber[] {
-  return loadFile("subscribers.json", []);
+export async function getSubscribers(): Promise<Subscriber[]> {
+  const data = await redis.get<Subscriber[]>(SUBSCRIBERS_KEY);
+  return data || [];
 }
 
-export function saveSubscribers(subs: Subscriber[]) {
-  saveFile("subscribers.json", subs);
+export async function saveSubscribers(subs: Subscriber[]): Promise<void> {
+  await redis.set(SUBSCRIBERS_KEY, subs);
 }
 
-export function addSubscriber(sub: Omit<Subscriber, "id" | "createdAt" | "status">): Subscriber {
-  const subs = getSubscribers();
+export async function addSubscriber(sub: Omit<Subscriber, "id" | "createdAt" | "status">): Promise<Subscriber> {
+  const subs = await getSubscribers();
 
   // Check duplicate by email
   if (sub.email && subs.some((s) => s.email === sub.email && s.status === "active")) {
@@ -60,28 +72,30 @@ export function addSubscriber(sub: Omit<Subscriber, "id" | "createdAt" | "status
     createdAt: new Date().toISOString(),
   };
   subs.push(newSub);
-  saveSubscribers(subs);
+  await saveSubscribers(subs);
   return newSub;
 }
 
-export function unsubscribeById(id: string) {
-  const subs = getSubscribers();
+export async function unsubscribeById(id: string): Promise<void> {
+  const subs = await getSubscribers();
   const sub = subs.find((s) => s.id === id);
   if (sub) {
     sub.status = "unsubscribed";
     sub.unsubscribedAt = new Date().toISOString();
-    saveSubscribers(subs);
+    await saveSubscribers(subs);
   }
 }
 
-export function getActiveEmailSubscribers(tag?: string): Subscriber[] {
-  return getSubscribers().filter(
+export async function getActiveEmailSubscribers(tag?: string): Promise<Subscriber[]> {
+  const subs = await getSubscribers();
+  return subs.filter(
     (s) => s.status === "active" && s.email && (!tag || s.tags.includes(tag))
   );
 }
 
-export function getSubscriberById(id: string): Subscriber | null {
-  return getSubscribers().find((s) => s.id === id) || null;
+export async function getSubscriberById(id: string): Promise<Subscriber | null> {
+  const subs = await getSubscribers();
+  return subs.find((s) => s.id === id) || null;
 }
 
 // ═══════════════════════════════════════

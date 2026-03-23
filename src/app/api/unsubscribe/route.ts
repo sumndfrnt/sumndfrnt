@@ -11,9 +11,9 @@ export async function POST(req: NextRequest) {
   if (!id) return NextResponse.json({ success: true }); // same response always
 
   // Process silently — never confirm whether ID exists
-  const sub = getSubscriberById(id);
+  const sub = await getSubscriberById(id);
   if (sub && sub.status === "active") {
-    unsubscribeById(id);
+    await unsubscribeById(id);
 
     const campaigns = getCampaigns()
       .filter((c) => c.status === "sent")
