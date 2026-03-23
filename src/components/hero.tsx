@@ -19,9 +19,18 @@ export function Hero() {
     offset: ["start start", "end start"],
   });
 
-  // Single wrapper transform — avoids RGB fringing by not animating text directly
-  const contentY = useTransform(scrollYProgress, [0, 1], [0, -100]);
-  const contentOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
+  // Three depth layers — each wraps content, not text directly
+  // Layer 0 (overline): furthest back, moves slowest
+  const layer0Y = useTransform(scrollYProgress, [0, 1], [0, -30]);
+  const layer0Opacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
+
+  // Layer 1 (headline): mid-depth
+  const layer1Y = useTransform(scrollYProgress, [0, 1], [0, -70]);
+  const layer1Opacity = useTransform(scrollYProgress, [0, 0.65], [1, 0]);
+
+  // Layer 2 (subtitle + CTA): closest, moves fastest, fades first
+  const layer2Y = useTransform(scrollYProgress, [0, 1], [0, -120]);
+  const layer2Opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
   return (
     <section
@@ -38,72 +47,81 @@ export function Hero() {
         }}
       />
 
-      {/* All hero content in ONE animated wrapper — prevents per-element RGB fringing */}
-      <motion.div
-        className="relative z-10 w-full px-8 sm:px-12 lg:px-20 pb-[12vh]"
-        style={reducedMotion ? {} : { y: contentY, opacity: contentOpacity }}
-      >
-        {/* Overline */}
-        <motion.p
-          className="text-[11px] font-semibold tracking-[0.2em] text-white/20 uppercase mb-6"
-          initial={reducedMotion ? false : { opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2, ease, delay: 0 }}
-        >
-          Atlanta
-        </motion.p>
+      <div className="relative z-10 w-full px-8 sm:px-12 lg:px-20 pb-[12vh]">
 
-        {/* Headline */}
-        <motion.h1
-          className="font-display"
-          style={{
-            fontSize: "clamp(48px, 11vw, 160px)",
-            lineHeight: 0.95,
-            letterSpacing: "-0.05em",
-          }}
-          initial={reducedMotion ? false : { opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2, ease, delay: 0.15 }}
-        >
-          <span className="block font-bold text-white">From the</span>
-          <span className="block font-bold text-white">culture.</span>
-        </motion.h1>
-
-        <motion.p
-          className="font-display mt-4"
-          style={{
-            fontSize: "clamp(28px, 5vw, 64px)",
-            lineHeight: 1.1,
-            letterSpacing: "-0.03em",
-          }}
-          initial={reducedMotion ? false : { opacity: 0, y: 30 }}
-          animate={{ opacity: 0.35, y: 0 }}
-          transition={{ duration: 1.2, ease, delay: 0.4 }}
-        >
-          <span className="font-normal text-white">For what&apos;s next.</span>
-        </motion.p>
-
-        {/* CTA */}
+        {/* LAYER 0: Overline — furthest back */}
         <motion.div
-          className="mt-12 flex items-center gap-8"
-          initial={reducedMotion ? false : { opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, ease, delay: 0.7 }}
+          style={reducedMotion ? {} : { y: layer0Y, opacity: layer0Opacity }}
         >
-          <a
-            href="#events"
-            className="text-[14px] font-medium text-black bg-white rounded-full px-8 py-3.5 hover:opacity-80 transition-opacity duration-500"
+          <motion.p
+            className="text-[11px] font-semibold tracking-[0.2em] text-white/20 uppercase mb-6"
+            initial={reducedMotion ? false : { opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.2, ease, delay: 0 }}
           >
-            See What&apos;s Next
-          </a>
-          <a
-            href="#about"
-            className="text-[13px] text-white/30 hover:text-white/60 transition-colors duration-500"
-          >
-            Learn more &darr;
-          </a>
+            Atlanta
+          </motion.p>
         </motion.div>
-      </motion.div>
+
+        {/* LAYER 1: Headline — mid-depth */}
+        <motion.div
+          style={reducedMotion ? {} : { y: layer1Y, opacity: layer1Opacity }}
+        >
+          <motion.h1
+            className="font-display"
+            style={{
+              fontSize: "clamp(48px, 11vw, 160px)",
+              lineHeight: 0.95,
+              letterSpacing: "-0.05em",
+            }}
+            initial={reducedMotion ? false : { opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.2, ease, delay: 0.15 }}
+          >
+            <span className="block font-bold text-white">From the</span>
+            <span className="block font-bold text-white">culture.</span>
+          </motion.h1>
+        </motion.div>
+
+        {/* LAYER 2: Subtitle + CTA — closest to viewer */}
+        <motion.div
+          style={reducedMotion ? {} : { y: layer2Y, opacity: layer2Opacity }}
+        >
+          <motion.p
+            className="font-display mt-4"
+            style={{
+              fontSize: "clamp(28px, 5vw, 64px)",
+              lineHeight: 1.1,
+              letterSpacing: "-0.03em",
+            }}
+            initial={reducedMotion ? false : { opacity: 0, y: 30 }}
+            animate={{ opacity: 0.35, y: 0 }}
+            transition={{ duration: 1.2, ease, delay: 0.4 }}
+          >
+            <span className="font-normal text-white">For what&apos;s next.</span>
+          </motion.p>
+
+          <motion.div
+            className="mt-12 flex items-center gap-8"
+            initial={reducedMotion ? false : { opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, ease, delay: 0.7 }}
+          >
+            <a
+              href="#events"
+              className="text-[14px] font-medium text-black bg-white rounded-full px-8 py-3.5 hover:opacity-80 transition-opacity duration-500"
+            >
+              See What&apos;s Next
+            </a>
+            <a
+              href="#about"
+              className="text-[13px] text-white/30 hover:text-white/60 transition-colors duration-500"
+            >
+              Learn more &darr;
+            </a>
+          </motion.div>
+        </motion.div>
+      </div>
 
       {/* Scroll line */}
       <motion.div
