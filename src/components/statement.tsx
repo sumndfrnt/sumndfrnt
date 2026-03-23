@@ -32,7 +32,7 @@ export function Statement() {
 
       <motion.div
         className="max-w-[1000px]"
-        style={reducedMotion ? {} : { opacity, y }}
+        style={reducedMotion ? {} : { opacity, y, translateZ: 0, backfaceVisibility: "hidden" as const }}
       >
         <p
           className="font-display font-semibold text-white leading-[1.08]"

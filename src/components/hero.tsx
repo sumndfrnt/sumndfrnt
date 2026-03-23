@@ -78,7 +78,7 @@ export function Hero() {
 
         {/* Headline — massive, left-aligned, weight contrast */}
         <motion.div
-          style={reducedMotion ? {} : { y: layer1Y, opacity: fadeOut }}
+          style={reducedMotion ? {} : { y: layer1Y, opacity: fadeOut, translateZ: 0 }}
         >
           <motion.h1
             className="font-display"
@@ -86,6 +86,7 @@ export function Hero() {
               fontSize: "clamp(48px, 11vw, 160px)",
               lineHeight: 0.95,
               letterSpacing: "-0.05em",
+              backfaceVisibility: "hidden",
             }}
             {...entrance(0.15)}
           >
