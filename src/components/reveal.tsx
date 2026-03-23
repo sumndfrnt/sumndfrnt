@@ -3,20 +3,19 @@
 import { type ReactNode } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 
+// One easing curve, everywhere. Slow start, confident finish.
+const ease = [0.25, 0.1, 0, 1] as const;
+
 interface RevealProps {
   children: ReactNode;
   delay?: number;
   className?: string;
-  y?: number;
-  duration?: number;
 }
 
 export function Reveal({
   children,
   delay = 0,
   className = "",
-  y = 40,
-  duration = 0.9,
 }: RevealProps) {
   const reducedMotion = useReducedMotion();
 
@@ -27,13 +26,13 @@ export function Reveal({
   return (
     <motion.div
       className={className}
-      initial={{ opacity: 0, y }}
+      initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.1 }}
       transition={{
-        duration,
+        duration: 1.0,
         delay,
-        ease: [0.16, 1, 0.3, 1],
+        ease,
       }}
     >
       {children}

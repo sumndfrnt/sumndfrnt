@@ -8,7 +8,7 @@ export async function EventsSection() {
   const past = await getPastEvents();
 
   return (
-    <section id="events" className="py-[160px] px-6 max-w-[900px] mx-auto text-center">
+    <section id="events" className="py-[140px] px-6 max-w-[680px] mx-auto text-center">
       <Reveal>
         <h2 className="font-display text-[clamp(32px,5vw,56px)] font-bold leading-[1.06] tracking-tight text-white mb-4">
           Upcoming.
@@ -31,11 +31,7 @@ export async function EventsSection() {
 
       {past.length > 0 && (
         <div className="mt-20">
-          <Reveal>
-            <p className="text-xs font-semibold tracking-[0.12em] text-white/20 mb-6">
-              HISTORY
-            </p>
-          </Reveal>
+          <div className="h-px bg-white/[0.06] mb-6" />
           <div className="flex flex-col">
             {past.map((event, i) => (
               <Reveal key={event.id} delay={i * 0.06}>
