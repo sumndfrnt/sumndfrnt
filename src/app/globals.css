@@ -52,16 +52,6 @@ body::after {
   background: rgba(255,255,255,0.12);
 }
 
-/* Prevent sub-pixel color fringing on GPU-composited text */
-* {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-[style*="transform"] {
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-
 /* Near-invisible scrollbar */
 ::-webkit-scrollbar {
   width: 4px;

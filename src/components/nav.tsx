@@ -14,7 +14,7 @@ export function Nav() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > window.innerHeight * 0.7);
+    const onScroll = () => setScrolled(window.scrollY > 100);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -25,16 +25,18 @@ export function Nav() {
         className="fixed top-0 left-0 right-0 z-50 transition-all duration-700"
         style={{
           padding: "16px 32px",
-          opacity: scrolled ? 1 : 0,
-          pointerEvents: scrolled ? "auto" : "none",
-          background: "rgba(0,0,0,0.85)",
-          backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
-          borderBottom: "1px solid rgba(255,255,255,0.04)",
+          background: scrolled || menuOpen ? "rgba(0,0,0,0.9)" : "transparent",
+          backdropFilter: scrolled || menuOpen ? "blur(20px)" : "none",
+          WebkitBackdropFilter: scrolled || menuOpen ? "blur(20px)" : "none",
+          borderBottom: scrolled ? "1px solid rgba(255,255,255,0.04)" : "1px solid transparent",
         }}
       >
         <div className="max-w-[1200px] mx-auto flex items-center justify-between">
-          <Link href="/" className="text-[13px] font-display font-bold text-white/70 tracking-tight hover:text-white transition-colors duration-500">
+          <Link
+            href="/"
+            className="text-[13px] font-display font-bold tracking-tight transition-colors duration-500"
+            style={{ color: scrolled ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.4)" }}
+          >
             SUM&apos;N DFRNT
           </Link>
 
@@ -44,7 +46,8 @@ export function Nav() {
               <Link
                 key={link.label}
                 href={link.href}
-                className="text-[12px] text-white/30 hover:text-white/70 transition-colors duration-500"
+                className="text-[12px] transition-colors duration-500"
+                style={{ color: scrolled ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.2)" }}
               >
                 {link.label}
               </Link>
