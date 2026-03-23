@@ -167,7 +167,7 @@ export async function sendEmail({
   try {
     const accessToken = await getValidAccessToken();
     const tokens = getStoredTokens();
-    const from = tokens?.email || "hi@sumndfrnt.com";
+    const from = tokens?.email || "hello@sumndfrnt.com";
 
     // Build RFC 2822 MIME message
     const boundary = `boundary_${Date.now()}`;
