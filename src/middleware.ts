@@ -50,7 +50,7 @@ export function middleware(req: NextRequest) {
 
   // ── Rate limits ──
   if (pathname === "/api/subscribe" && req.method === "POST") {
-    if (!rateOk(`sub:${ip}`, 8, 900_000)) {          // 8 per 15 min
+    if (!rateOk(`sub:${ip}`, 3, 900_000)) {          // 3 per 15 min
       return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     }
   }
@@ -98,7 +98,7 @@ export function middleware(req: NextRequest) {
   res.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
   res.headers.set(
     "Content-Security-Policy",
-    "default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://accounts.google.com https://oauth2.googleapis.com https://gmail.googleapis.com;"
+    "default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; frame-src https://challenges.cloudflare.com; connect-src 'self' https://accounts.google.com https://oauth2.googleapis.com https://gmail.googleapis.com;"
   );
   res.headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
 

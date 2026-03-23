@@ -19,7 +19,50 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
 
-  const { firstName, lastName, email, phone, tag } = body;
+  const { firstName, lastName, email, phone, tag, _hp, _t, _cf } = body;
+
+  // Honeypot — reject if filled (real users never see this field)
+  if (_hp) {
+    // Return 201 to not reveal detection to bots
+    return NextResponse.json({ message: "Subscribed" }, { status: 201 });
+  }
+
+  // Timing — reject if submitted faster than 2s after render
+  // Threshold kept conservative to avoid false positives from autofill/mobile
+  if (_t && typeof _t === "number") {
+    const elapsed = Date.now() - _t;
+    if (elapsed < 2000) {
+      return NextResponse.json({ message: "Subscribed" }, { status: 201 });
+    }
+  }
+
+  // Cloudflare Turnstile — validate token if secret key is configured
+  const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
+  if (turnstileSecret) {
+    if (!_cf) {
+      return NextResponse.json({ error: "Verification required" }, { status: 400 });
+    }
+    const failOpen = process.env.ALLOW_TURNSTILE_FAIL_OPEN === "true";
+    try {
+      const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.ip || "";
+      const verifyParams: Record<string, string> = { secret: turnstileSecret, response: _cf };
+      if (ip) verifyParams.remoteip = ip;
+      const cfRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams(verifyParams),
+      });
+      const cfData = await cfRes.json();
+      if (!cfData.success) {
+        return NextResponse.json({ error: "Verification failed" }, { status: 403 });
+      }
+    } catch {
+      // Turnstile API unreachable — fail closed unless explicitly overridden
+      if (!failOpen) {
+        return NextResponse.json({ error: "Verification unavailable" }, { status: 503 });
+      }
+    }
+  }
 
   if (!firstName || !lastName) {
     return NextResponse.json({ error: "First and last name required" }, { status: 400 });

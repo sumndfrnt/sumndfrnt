@@ -89,7 +89,7 @@ function UnsubscribeInner() {
               Something went wrong.
             </h1>
             <p className="text-[15px] text-white/40 mb-6">
-              Try again or email hi@sumndfrnt.com to unsubscribe.
+              Try again later or use the contact form on our website.
             </p>
           </>
         )}

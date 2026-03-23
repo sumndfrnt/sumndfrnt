@@ -199,7 +199,7 @@ function SettingsInner() {
             </div>
             <div>
               <p className="text-white/50 font-medium mb-1">4. Connect</p>
-              <p>Come back here and click Connect Google Workspace. Sign in with hi@sumndfrnt.com and grant permission.</p>
+              <p>Come back here and click Connect Google Workspace. Sign in with your Google Workspace admin email and grant permission.</p>
             </div>
             <div>
               <p className="text-white/50 font-medium mb-1">5. Done</p>

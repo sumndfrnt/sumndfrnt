@@ -1,14 +1,40 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import Script from "next/script";
+
+declare global {
+  interface Window { turnstile?: { render: (el: string | HTMLElement, opts: any) => string; reset: (id: string) => void } }
+}
 
 export function KeepInTouch() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [hp, setHp] = useState("");
+  const [cfToken, setCfToken] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
+  const renderTime = useRef(0);
+  const turnstileRef = useRef<HTMLDivElement>(null);
+  const turnstileId = useRef<string>("");
+
+  useEffect(() => { renderTime.current = Date.now(); }, []);
+
+  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+
+  // Render Turnstile widget once the script loads
+  const initTurnstile = useCallback(() => {
+    if (!siteKey || !turnstileRef.current || turnstileId.current) return;
+    if (!window.turnstile) return;
+    turnstileId.current = window.turnstile.render(turnstileRef.current, {
+      sitekey: siteKey,
+      theme: "dark",
+      callback: (token: string) => setCfToken(token),
+      "expired-callback": () => setCfToken(""),
+    });
+  }, [siteKey]);
 
   const inp = "w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3 text-[15px] text-white placeholder:text-white/20 outline-none focus:border-white/20 transition-colors";
 
@@ -29,7 +55,7 @@ export function KeepInTouch() {
       const res = await fetch("/api/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ firstName, lastName, email, phone: phone || undefined, tag: "events" }),
+        body: JSON.stringify({ firstName, lastName, email, phone: phone || undefined, tag: "events", _hp: hp, _t: renderTime.current, _cf: cfToken }),
       });
       if (res.ok) setStatus("success");
       else {
@@ -66,6 +92,18 @@ export function KeepInTouch() {
           </div>
           <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className={inp} />
           <input type="tel" placeholder="Phone (optional)" value={phone} onChange={(e) => setPhone(e.target.value)} className={inp} />
+          {siteKey && (
+            <>
+              <Script
+                src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+                strategy="lazyOnload"
+                onReady={initTurnstile}
+              />
+              <div ref={turnstileRef} className="flex justify-center" />
+            </>
+          )}
+          {/* Honeypot — hidden from real users, bots fill it */}
+          <input type="text" value={hp} onChange={(e) => setHp(e.target.value)} className="absolute opacity-0 pointer-events-none" style={{ position: "absolute", left: "-9999px" }} tabIndex={-1} autoComplete="off" aria-hidden="true" />
 
           <button
             onClick={handleSubmit}
