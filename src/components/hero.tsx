@@ -19,12 +19,12 @@ export function Hero() {
     offset: ["start start", "end start"],
   });
 
-  // Parallax layers at different rates
-  const layer0Y = useTransform(scrollYProgress, [0, 1], [0, -60]);
-  const layer1Y = useTransform(scrollYProgress, [0, 1], [0, -150]);
-  const layer2Y = useTransform(scrollYProgress, [0, 1], [0, -250]);
-  const fadeOut = useTransform(scrollYProgress, [0, 0.4], [1, 0]);
-  const ctaFade = useTransform(scrollYProgress, [0, 0.25], [1, 0]);
+  // Parallax layers — reduced movement, slower fadeout
+  const layer0Y = useTransform(scrollYProgress, [0, 1], [0, -40]);
+  const layer1Y = useTransform(scrollYProgress, [0, 1], [0, -90]);
+  const layer2Y = useTransform(scrollYProgress, [0, 1], [0, -140]);
+  const fadeOut = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
+  const ctaFade = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
   const entrance = (delay: number, duration = 1.2) =>
     reducedMotion
@@ -39,7 +39,8 @@ export function Hero() {
     <section
       ref={sectionRef}
       id="top"
-      className="relative h-[100vh] flex items-end overflow-hidden"
+      className="relative min-h-screen flex items-end overflow-hidden"
+      style={{ height: "110vh" }}
     >
       {/* Atmosphere — soft gradient from center */}
       <div

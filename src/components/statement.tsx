@@ -42,7 +42,7 @@ export function Statement() {
           }}
         >
           We don&apos;t follow blueprints.{" "}
-          <span className="text-white/25">
+          <span className="text-white/50">
             We build the rooms that don&apos;t exist yet.
           </span>
         </p>
